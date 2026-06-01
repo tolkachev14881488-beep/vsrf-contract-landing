@@ -4,26 +4,19 @@
 (function () {
   "use strict";
 
-  function resolveFormSubmitEmail() {
-    const meta = document.querySelector('meta[name="formsubmit-email"]');
-    return meta?.content?.trim() || "rodionova61@bk.ru";
+  function resolveApiUrl() {
+    const meta = document.querySelector('meta[name="api-url"]');
+    if (meta?.content?.trim()) return meta.content.trim();
+
+    const host = location.hostname;
+    if (host.includes("onrender.com")) return "/api/apply";
+    if (host.includes("github.io")) {
+      return "https://vsrf-contract-landing.onrender.com/api/apply";
+    }
+    return "/api/apply";
   }
 
-  const FORMSUBMIT_EMAIL = resolveFormSubmitEmail();
-  const FORMSUBMIT_URL = `https://formsubmit.co/ajax/${encodeURIComponent(FORMSUBMIT_EMAIL)}`;
-
-  const REGION_LABELS = {
-    moscow: "Москва и МО",
-    spb: "Санкт-Петербург и ЛО",
-    central: "Центральный ФО",
-    south: "Южный ФО",
-    north: "Северо-Западный ФО",
-    volga: "Приволжский ФО",
-    ural: "Уральский ФО",
-    siberia: "Сибирский ФО",
-    "far-east": "Дальневосточный ФО",
-    other: "Другой",
-  };
+  const API_URL = resolveApiUrl();
 
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -236,24 +229,6 @@
     if (type) status.classList.add(`is-${type}`);
   }
 
-  function buildFormSubmitBody(payload, form) {
-    return {
-      _subject: `Заявка: ${payload.name} — ${payload.phone}`,
-      _template: "table",
-      _captcha: "false",
-      _honey: form._honey?.value || "",
-      "ФИО": payload.name,
-      "Телефон": payload.phone,
-      "Возраст": String(payload.age),
-      "Регион": REGION_LABELS[payload.region] || payload.region,
-      "Комментарий": payload.comment || "—",
-    };
-  }
-
-  function isFormSubmitSuccess(body) {
-    return body?.success === true || body?.success === "true";
-  }
-
   async function submitForm(form) {
     const btn = $("#submit-btn");
     const payload = {
@@ -270,21 +245,16 @@
     setFormStatus("", "");
 
     try {
-      const res = await fetch(FORMSUBMIT_URL, {
+      const res = await fetch(API_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify(buildFormSubmitBody(payload, form)),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
 
       const body = await res.json().catch(() => ({}));
 
-      if (!res.ok || !isFormSubmitSuccess(body)) {
-        const errMsg =
-          body.message ||
-          "Не удалось отправить заявку. Позвоните +7 906 310-16-33 или повторите позже.";
+      if (!res.ok) {
+        const errMsg = body.error || body.message || "Ошибка отправки. Попробуйте позже.";
         setFormStatus(errMsg, "error");
         showToast(errMsg);
         return;
@@ -297,7 +267,7 @@
       showToast("Заявка успешно отправлена");
     } catch {
       const fallback =
-        "Ошибка сети. Позвоните по телефону +7 906 310-16-33 или повторите позже.";
+        "Сервер недоступен (подождите 30 сек. и повторите) или позвоните +7 906 310-16-33.";
       setFormStatus(fallback, "error");
       showToast("Ошибка сети");
     } finally {
