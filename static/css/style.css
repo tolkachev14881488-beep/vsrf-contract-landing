@@ -1926,10 +1926,20 @@ body.nav-open {
     display: none;
   }
 
+  .hero__inner {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hero__content {
+    order: 1;
+  }
+
   .hero__visual {
-    order: -1;
+    order: 2;
     max-width: 32rem;
     margin-inline: auto;
+    width: 100%;
   }
 }
 
