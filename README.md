@@ -26,7 +26,13 @@ vsrf/
     └── TEST_CASES.md
 ```
 
-## Запуск
+## Онлайн
+
+**Сайт (GitHub Pages):** https://tolkachev14881488-beep.github.io/vsrf-contract-landing/
+
+Для работы формы заявок разверните бэкенд на [Render](https://render.com/deploy?repo=https://github.com/tolkachev14881488-beep/vsrf-contract-landing) (бесплатный план). После деплоя API будет доступен по адресу `https://vsrf-contract-landing.onrender.com`.
+
+## Локальный запуск
 
 ```bash
 pip install -r requirements.txt
