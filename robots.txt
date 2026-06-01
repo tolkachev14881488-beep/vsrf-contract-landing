@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://tolkachev14881488-beep.github.io/vsrf-contract-landing/sitemap.xml
+Sitemap: https://sluzhbarf.ru/sitemap.xml

@@ -15,7 +15,7 @@
 
     const host = location.hostname;
     if (host.includes("onrender.com")) return "/api/apply";
-    if (host.includes("github.io")) {
+    if (host.includes("github.io") || host === "sluzhbarf.ru" || host === "www.sluzhbarf.ru") {
       return "https://vsrf-contract-landing.onrender.com/api/apply";
     }
     return "/api/apply";

@@ -27,7 +27,7 @@ jobs:
         run: |
           mkdir -p public
           cp index.html public/
-          cp robots.txt sitemap.xml public/
+          cp robots.txt sitemap.xml CNAME public/
           cp -r static public/
 
       - uses: actions/configure-pages@v5

@@ -28,7 +28,10 @@ vsrf/
 
 ## Онлайн
 
-**Сайт (GitHub Pages):** https://tolkachev14881488-beep.github.io/vsrf-contract-landing/
+**Сайт:** https://sluzhbarf.ru  
+**Резерв (GitHub Pages):** https://tolkachev14881488-beep.github.io/vsrf-contract-landing/
+
+Настройка DNS: [docs/DOMAIN.md](docs/DOMAIN.md)
 
 Для работы формы заявок разверните бэкенд на [Render](https://render.com/deploy?repo=https://github.com/tolkachev14881488-beep/vsrf-contract-landing) (бесплатный план). После деплоя API будет доступен по адресу `https://vsrf-contract-landing.onrender.com`.
 
