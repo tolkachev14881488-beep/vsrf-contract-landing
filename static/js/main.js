@@ -272,6 +272,11 @@
     addFormSubmitExtra(form, "Регион", REGION_LABELS[payload.region] || payload.region);
     addFormSubmitExtra(form, "Комментарий", payload.comment || "—");
 
+    ["name", "phone", "age", "region", "comment", "consent"].forEach((field) => {
+      const el = form.elements[field];
+      if (el) el.disabled = true;
+    });
+
     if (btn) {
       btn.disabled = true;
       btn.textContent = "Отправка…";
