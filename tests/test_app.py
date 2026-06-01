@@ -125,25 +125,25 @@ class TestApplyEndpoint:
     body = response.get_json()
     assert body["success"] is False
 
-  def test_invalid_submission_returns_400(self, client, valid_payload):
+  def test_invalid_submission_returns_410(self, client, valid_payload):
     valid_payload["age"] = 10
     response = client.post(
       "/api/apply",
       data=json.dumps(valid_payload),
       content_type="application/json",
     )
-    assert response.status_code == 400
+    assert response.status_code == 410
     body = response.get_json()
     assert body["success"] is False
     assert "error" in body
 
-  def test_empty_body_returns_400(self, client):
+  def test_empty_body_returns_410(self, client):
     response = client.post(
       "/api/apply",
       data=json.dumps({}),
       content_type="application/json",
     )
-    assert response.status_code == 400
+    assert response.status_code == 410
 
   def test_comment_truncation(self, valid_payload):
     valid_payload["comment"] = "а" * 3000
@@ -155,15 +155,12 @@ class TestApplyEndpoint:
 class TestSeoMeta:
   """TC-014: SEO tags and structured data on landing page."""
 
-  def test_seo_meta_and_json_ld(self, client):
+  def test_unpublished_page_has_noindex(self, client):
     response = client.get("/")
     html = response.data.decode("utf-8")
     assert response.status_code == 200
-    assert 'name="description"' in html
-    assert "canonical" in html
-    assert 'property="og:title"' in html
-    assert "application/ld+json" in html
-    assert "FAQPage" in html
+    assert 'name="robots" content="noindex, nofollow"' in html
+    assert "снят с публикации" in html.lower()
 
 
 class TestStaticAssets:
@@ -182,7 +179,7 @@ class TestStaticAssets:
   def test_robots_txt(self, client):
     response = client.get("/robots.txt")
     assert response.status_code == 200
-    assert b"Sitemap:" in response.data
+    assert b"Disallow: /" in response.data
 
   def test_sitemap_xml(self, client):
     response = client.get("/sitemap.xml")
