@@ -40,7 +40,7 @@ class TestHealthEndpoint:
     data = response.get_json()
     assert data["status"] == "ok"
     assert data["service"] == "vsrf-contract-landing"
-    assert "formsubmit_email" in data
+    assert "web3forms_configured" in data
 
 
 class TestIndexPage:
@@ -119,7 +119,7 @@ class TestApplyEndpoint:
     test_file = tmp_path / "applications.jsonl"
     monkeypatch.setattr("app.APPLICATIONS_FILE", test_file)
     monkeypatch.setattr("app.DATA_DIR", tmp_path)
-    monkeypatch.setattr("app.send_via_formsubmit", lambda _record: None)
+    monkeypatch.setattr("app.deliver_application", lambda _record: "test")
     response = client.post(
       "/api/apply",
       data=json.dumps(valid_payload),

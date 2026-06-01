@@ -23,3 +23,5 @@ services:
         value: "true"
       - key: SMTP_PASSWORD
         sync: false
+      - key: WEB3FORMS_ACCESS_KEY
+        sync: false

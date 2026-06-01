@@ -4,10 +4,25 @@
 (function () {
   "use strict";
 
-  function resolveFormSubmitEmail() {
-    const meta = document.querySelector('meta[name="formsubmit-email"]');
-    return meta?.content?.trim() || "rodionova61@bk.ru";
+  function resolveWeb3FormsKey() {
+    const meta = document.querySelector('meta[name="web3forms-access-key"]');
+    return meta?.content?.trim() || "";
   }
+
+  function resolveApiUrl() {
+    const meta = document.querySelector('meta[name="api-url"]');
+    if (meta?.content?.trim()) return meta.content.trim();
+
+    const host = location.hostname;
+    if (host.includes("onrender.com")) return "/api/apply";
+    if (host.includes("github.io")) {
+      return "https://vsrf-contract-landing.onrender.com/api/apply";
+    }
+    return "/api/apply";
+  }
+
+  const WEB3FORMS_URL = "https://api.web3forms.com/submit";
+  const API_URL = resolveApiUrl();
 
   const REGION_LABELS = {
     moscow: "Москва и МО",
@@ -233,76 +248,81 @@
     if (type) status.classList.add(`is-${type}`);
   }
 
-  function clearFormSubmitExtras(form) {
-    form.querySelectorAll("[data-formsubmit-extra]").forEach((el) => el.remove());
+  function buildWeb3FormsBody(payload, accessKey) {
+    return {
+      access_key: accessKey,
+      subject: `Заявка: ${payload.name} — ${payload.phone}`,
+      from_name: "Лендинг — служба по контракту ВС РФ",
+      "ФИО": payload.name,
+      "Телефон": payload.phone,
+      "Возраст": String(payload.age),
+      "Регион": REGION_LABELS[payload.region] || payload.region,
+      "Комментарий": payload.comment || "—",
+    };
   }
 
-  function addFormSubmitExtra(form, name, value) {
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = name;
-    input.value = value;
-    input.dataset.formsubmitExtra = "1";
-    form.appendChild(input);
-  }
-
-  function buildReturnUrl() {
-    const url = new URL(location.href.split("#")[0]);
-    url.searchParams.set("sent", "1");
-    url.hash = "apply";
-    return url.toString();
-  }
-
-  function submitFormToFormSubmit(form, payload) {
-    const btn = $("#submit-btn");
-    const email = resolveFormSubmitEmail();
-
-    clearFormSubmitExtras(form);
-    form.action = `https://formsubmit.co/${email}`;
-    form.method = "POST";
-    form.target = "_self";
-
-    addFormSubmitExtra(form, "_subject", `Заявка: ${payload.name} — ${payload.phone}`);
-    addFormSubmitExtra(form, "_template", "table");
-    addFormSubmitExtra(form, "_captcha", "false");
-    addFormSubmitExtra(form, "_next", buildReturnUrl());
-    addFormSubmitExtra(form, "ФИО", payload.name);
-    addFormSubmitExtra(form, "Телефон", payload.phone);
-    addFormSubmitExtra(form, "Возраст", String(payload.age));
-    addFormSubmitExtra(form, "Регион", REGION_LABELS[payload.region] || payload.region);
-    addFormSubmitExtra(form, "Комментарий", payload.comment || "—");
-
-    ["name", "phone", "age", "region", "comment", "consent"].forEach((field) => {
-      const el = form.elements[field];
-      if (el) el.disabled = true;
+  async function submitViaWeb3Forms(payload, accessKey) {
+    const res = await fetch(WEB3FORMS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify(buildWeb3FormsBody(payload, accessKey)),
     });
-
-    if (btn) {
-      btn.disabled = true;
-      btn.textContent = "Отправка…";
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || !body.success) {
+      throw new Error(body.message || "Web3Forms отклонил заявку");
     }
-    setFormStatus("", "");
-
-    form.submit();
   }
 
-  function showSubmissionSuccess() {
-    const params = new URLSearchParams(location.search);
-    if (params.get("sent") !== "1") return;
+  async function submitViaApi(payload) {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(body.error || body.message || "Ошибка сервера");
+    }
+  }
 
+  function showFormSuccess(form) {
+    form.reset();
+    $$(".form__error").forEach((el) => { el.textContent = ""; });
+    $$(".is-invalid").forEach((el) => el.classList.remove("is-invalid"));
     setFormStatus("Заявка принята! Мы свяжемся с вами в течение 24 часов.", "success");
     showToast("Заявка успешно отправлена");
+  }
 
-    const clean = new URL(location.href);
-    clean.searchParams.delete("sent");
-    history.replaceState({}, "", clean.pathname + clean.search + clean.hash);
+  async function submitForm(form, payload) {
+    const btn = $("#submit-btn");
+    const web3Key = resolveWeb3FormsKey();
+
+    btn.disabled = true;
+    btn.textContent = "Отправка…";
+    setFormStatus("", "");
+
+    try {
+      if (web3Key) {
+        await submitViaWeb3Forms(payload, web3Key);
+      } else {
+        await submitViaApi(payload);
+      }
+      showFormSuccess(form);
+    } catch (err) {
+      const msg =
+        err?.message ||
+        "Не удалось отправить заявку. Позвоните +7 906 310-16-33.";
+      setFormStatus(msg, "error");
+      showToast("Ошибка отправки");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Отправить заявку";
+    }
   }
 
   function initForm() {
     const form = $("#apply-form");
     if (!form) return;
-
-    showSubmissionSuccess();
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -320,7 +340,7 @@
         consent: form.consent.checked,
       };
 
-      submitFormToFormSubmit(form, payload);
+      submitForm(form, payload);
     });
 
     form.querySelectorAll("input, select, textarea").forEach((el) => {

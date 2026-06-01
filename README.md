@@ -32,13 +32,17 @@ vsrf/
 
 Для работы формы заявок разверните бэкенд на [Render](https://render.com/deploy?repo=https://github.com/tolkachev14881488-beep/vsrf-contract-landing) (бесплатный план). После деплоя API будет доступен по адресу `https://vsrf-contract-landing.onrender.com`.
 
-### Почта для заявок (FormSubmit)
+### Почта для заявок (Web3Forms)
 
-Форма отправляет заявки на **rodionova61@bk.ru** через [FormSubmit](https://formsubmit.co) напрямую с сайта (без Render).
+FormSubmit иногда недоступен; используется [Web3Forms](https://web3forms.com) → письма на **rodionova61@bk.ru**.
 
-**Один раз после первой заявки:** на почту придёт письмо от FormSubmit с кнопкой **Activate Form** — нажмите её, и все следующие заявки будут приходить автоматически.
+1. Откройте https://web3forms.com  
+2. Укажите **rodionova61@bk.ru** → **Create Access Key**  
+3. Скопируйте ключ и добавьте в `index.html`:  
+   `<meta name="web3forms-access-key" content="ВАШ_КЛЮЧ">`  
+   **или** в Render → Environment → `WEB3FORMS_ACCESS_KEY` (для отправки через API).
 
-Опционально: SMTP на Render (см. `.env.example`) — резервная отправка через API `/api/apply`.
+После этого форма на GitHub Pages отправляет заявки без FormSubmit.
 
 ## Локальный запуск
 
