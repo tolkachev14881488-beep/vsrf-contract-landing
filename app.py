@@ -13,6 +13,8 @@ from pathlib import Path
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 
+from email_notify import EmailDeliveryError, email_configured, send_application_email
+
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 APPLICATIONS_FILE = DATA_DIR / "applications.jsonl"
@@ -123,16 +125,36 @@ def apply():
         return jsonify({"success": False, "error": error}), 400
 
     save_application(data)
+
+    try:
+        emailed = send_application_email(data)
+    except EmailDeliveryError:
+        return jsonify({
+            "success": False,
+            "error": "Заявка сохранена, но письмо не отправлено. Позвоните по телефону на сайте.",
+        }), 503
+
+    if email_configured() and not emailed:
+        return jsonify({
+            "success": False,
+            "error": "Не удалось отправить заявку на почту. Попробуйте позже или позвоните.",
+        }), 503
+
     return jsonify({
         "success": True,
         "message": "Заявка принята",
         "id": data["created_at"],
+        "emailed": emailed,
     }), 201
 
 
 @app.route("/api/health")
 def health():
-    return jsonify({"status": "ok", "service": "vsrf-contract-landing"})
+    return jsonify({
+        "status": "ok",
+        "service": "vsrf-contract-landing",
+        "email_configured": email_configured(),
+    })
 
 
 if __name__ == "__main__":

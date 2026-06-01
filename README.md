@@ -7,7 +7,7 @@
 - **HTML5** — семантическая разметка, доступность
 - **CSS3** — глубокая камуфляжная палитра (хаки), анимации, адаптив
 - **JavaScript** — навигация, валидация, маска телефона, отправка формы
-- **Python (Flask)** — API приёма заявок, сохранение в JSONL
+- **Python (Flask)** — API приёма заявок, сохранение в JSONL, отправка на почту
 
 ## Структура
 
@@ -31,6 +31,16 @@ vsrf/
 **Сайт (GitHub Pages):** https://tolkachev14881488-beep.github.io/vsrf-contract-landing/
 
 Для работы формы заявок разверните бэкенд на [Render](https://render.com/deploy?repo=https://github.com/tolkachev14881488-beep/vsrf-contract-landing) (бесплатный план). После деплоя API будет доступен по адресу `https://vsrf-contract-landing.onrender.com`.
+
+### Почта для заявок
+
+Заявки отправляются на **rodionova61@bk.ru** (SMTP Mail.ru).
+
+1. Войдите в почту [mail.ru](https://mail.ru) / bk.ru → **Настройки** → **Пароль и безопасность** → **Пароли для внешних приложений** — создайте пароль.
+2. На Render в сервисе **Environment** добавьте переменную `SMTP_PASSWORD` (значение — созданный пароль). Остальные переменные уже заданы в `render.yaml`.
+3. Локально скопируйте `.env.example` в `.env` и укажите `SMTP_PASSWORD`.
+
+Проверка: `GET /api/health` → `"email_configured": true`.
 
 ## Локальный запуск
 

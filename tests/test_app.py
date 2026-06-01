@@ -40,6 +40,7 @@ class TestHealthEndpoint:
     data = response.get_json()
     assert data["status"] == "ok"
     assert data["service"] == "vsrf-contract-landing"
+    assert "email_configured" in data
 
 
 class TestIndexPage:
@@ -118,6 +119,8 @@ class TestApplyEndpoint:
     test_file = tmp_path / "applications.jsonl"
     monkeypatch.setattr("app.APPLICATIONS_FILE", test_file)
     monkeypatch.setattr("app.DATA_DIR", tmp_path)
+    monkeypatch.setattr("app.send_application_email", lambda _record: False)
+    monkeypatch.setattr("app.email_configured", lambda: False)
 
     response = client.post(
       "/api/apply",
