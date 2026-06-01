@@ -32,15 +32,13 @@ vsrf/
 
 Для работы формы заявок разверните бэкенд на [Render](https://render.com/deploy?repo=https://github.com/tolkachev14881488-beep/vsrf-contract-landing) (бесплатный план). После деплоя API будет доступен по адресу `https://vsrf-contract-landing.onrender.com`.
 
-### Почта для заявок
+### Почта для заявок (FormSubmit)
 
-Заявки отправляются на **rodionova61@bk.ru** (SMTP Mail.ru).
+Форма на сайте отправляет заявки на **rodionova61@bk.ru** через [FormSubmit](https://formsubmit.co) — работает прямо с GitHub Pages, Render не обязателен.
 
-1. Войдите в почту [mail.ru](https://mail.ru) / bk.ru → **Настройки** → **Пароль и безопасность** → **Пароли для внешних приложений** — создайте пароль.
-2. На Render в сервисе **Environment** добавьте переменную `SMTP_PASSWORD` (значение — созданный пароль). Остальные переменные уже заданы в `render.yaml`.
-3. Локально скопируйте `.env.example` в `.env` и укажите `SMTP_PASSWORD`.
+**Один раз после первой заявки:** на почту придёт письмо от FormSubmit с кнопкой **Activate Form** — нажмите её, и все следующие заявки будут приходить автоматически.
 
-Проверка: `GET /api/health` → `"email_configured": true`.
+Опционально: SMTP на Render (см. `.env.example`) — резервная отправка через API `/api/apply`.
 
 ## Локальный запуск
 

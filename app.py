@@ -126,19 +126,12 @@ def apply():
 
     save_application(data)
 
-    try:
-        emailed = send_application_email(data)
-    except EmailDeliveryError:
-        return jsonify({
-            "success": False,
-            "error": "Заявка сохранена, но письмо не отправлено. Позвоните по телефону на сайте.",
-        }), 503
-
-    if email_configured() and not emailed:
-        return jsonify({
-            "success": False,
-            "error": "Не удалось отправить заявку на почту. Попробуйте позже или позвоните.",
-        }), 503
+    emailed = False
+    if email_configured():
+        try:
+            emailed = send_application_email(data)
+        except EmailDeliveryError:
+            pass
 
     return jsonify({
         "success": True,
