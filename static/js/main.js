@@ -29,17 +29,19 @@
 
     if (!toggle || !menu) return;
 
+    const setMenuOpen = (open) => {
+      toggle.setAttribute("aria-expanded", String(open));
+      menu.classList.toggle("is-open", open);
+      document.body.classList.toggle("nav-open", open);
+    };
+
     toggle.addEventListener("click", () => {
       const open = toggle.getAttribute("aria-expanded") === "true";
-      toggle.setAttribute("aria-expanded", String(!open));
-      menu.classList.toggle("is-open", !open);
+      setMenuOpen(!open);
     });
 
     menu.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", () => {
-        toggle.setAttribute("aria-expanded", "false");
-        menu.classList.remove("is-open");
-      });
+      link.addEventListener("click", () => setMenuOpen(false));
     });
 
     window.addEventListener("scroll", () => {
@@ -285,8 +287,34 @@
     });
   }
 
+  /* ——— Active section in nav ——— */
+  function initScrollSpy() {
+    const links = $$("[data-nav]");
+    const sections = links
+      .map((a) => document.querySelector(a.getAttribute("href")))
+      .filter(Boolean);
+
+    if (!sections.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const id = entry.target.id;
+          links.forEach((link) => {
+            link.classList.toggle("is-active", link.getAttribute("href") === `#${id}`);
+          });
+        });
+      },
+      { rootMargin: "-40% 0px -50% 0px", threshold: 0 }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+  }
+
   function init() {
     initNav();
+    initScrollSpy();
     initReveal();
     initCounters();
     initPhoneMask();
