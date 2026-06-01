@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="-<1;5<0 >>@C6Q==KE !8;  $">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f0d878"/>
+      <stop offset="50%" stop-color="#d4af37"/>
+      <stop offset="100%" stop-color="#9a7a28"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3d4e28"/>
+      <stop offset="100%" stop-color="#1a2114"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="58" fill="url(#shield)" stroke="url(#gold)" stroke-width="3"/>
+  <path d="M60 18 L28 32 V58 C28 78 42 94 60 100 C78 94 92 78 92 58 V32 Z" fill="#232b1a" stroke="url(#gold)" stroke-width="2"/>
+  <path d="M60 28 L38 38 V56 C38 70 48 82 60 86 C72 82 82 70 82 56 V38 Z" fill="url(#shield)"/>
+  <polygon points="60,36 72,52 60,48 48,52" fill="url(#gold)"/>
+  <rect x="54" y="50" width="12" height="22" rx="1" fill="url(#gold)"/>
+  <circle cx="60" cy="78" r="6" fill="none" stroke="url(#gold)" stroke-width="2"/>
+  <text x="60" y="112" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" font-weight="bold" fill="url(#gold)" letter-spacing="2">!  $</text>
+</svg>

@@ -25,14 +25,21 @@
   function initNav() {
     const toggle = $("#nav-toggle");
     const menu = $("#nav-menu");
-    const header = $(".header");
+    const nav = $("#site-nav");
+    const header = $(".site-header");
+    const backdrop = $("#nav-backdrop");
 
     if (!toggle || !menu) return;
 
     const setMenuOpen = (open) => {
       toggle.setAttribute("aria-expanded", String(open));
       menu.classList.toggle("is-open", open);
+      nav?.classList.toggle("is-open", open);
       document.body.classList.toggle("nav-open", open);
+      if (backdrop) {
+        backdrop.hidden = !open;
+        backdrop.classList.toggle("is-visible", open);
+      }
     };
 
     toggle.addEventListener("click", () => {
@@ -40,13 +47,19 @@
       setMenuOpen(!open);
     });
 
+    backdrop?.addEventListener("click", () => setMenuOpen(false));
+
     menu.querySelectorAll("a").forEach((link) => {
       link.addEventListener("click", () => setMenuOpen(false));
     });
 
     window.addEventListener("scroll", () => {
-      header.classList.toggle("is-scrolled", window.scrollY > 40);
+      header?.classList.toggle("is-scrolled", window.scrollY > 24);
     }, { passive: true });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    });
   }
 
   /* ——— Scroll reveal ——— */
@@ -319,7 +332,7 @@
     initCounters();
     initPhoneMask();
     initForm();
-    $(".header")?.classList.toggle("is-scrolled", window.scrollY > 40);
+    $(".site-header")?.classList.toggle("is-scrolled", window.scrollY > 24);
   }
 
   if (document.readyState === "loading") {
