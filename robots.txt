@@ -1,4 +1,2 @@
 User-agent: *
-Allow: /
-
-Sitemap: https://sluzhbarf.ru/sitemap.xml
+Disallow: /

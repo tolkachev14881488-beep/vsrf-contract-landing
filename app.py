@@ -121,35 +121,18 @@ def sitemap_xml():
 
 @app.route("/api/apply", methods=["POST"])
 def apply():
-    payload = request.get_json(silent=True)
-    data, error = validate_application(payload or {})
-
-    if error:
-        return jsonify({"success": False, "error": error}), 400
-
-    save_application(data)
-
-    try:
-        channel = deliver_application(data)
-    except DeliveryError as exc:
-        return jsonify({"success": False, "error": str(exc)}), 503
-
     return jsonify({
-        "success": True,
-        "message": "Заявка принята",
-        "id": data["created_at"],
-        "channel": channel,
-    }), 201
+        "success": False,
+        "error": "Сайт снят с публикации. Приём заявок отключён.",
+    }), 410
 
 
 @app.route("/api/health")
 def health():
     return jsonify({
-        "status": "ok",
+        "status": "unpublished",
         "service": "vsrf-contract-landing",
-        "notify_email": NOTIFY_EMAIL,
-        "web3forms_configured": web3forms_configured(),
-        "smtp_configured": email_configured(),
+        "published": False,
     })
 
 

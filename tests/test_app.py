@@ -38,9 +38,9 @@ class TestHealthEndpoint:
     response = client.get("/api/health")
     assert response.status_code == 200
     data = response.get_json()
-    assert data["status"] == "ok"
+    assert data["status"] == "unpublished"
+    assert data["published"] is False
     assert data["service"] == "vsrf-contract-landing"
-    assert "web3forms_configured" in data
 
 
 class TestIndexPage:
@@ -50,7 +50,7 @@ class TestIndexPage:
     response = client.get("/")
     assert response.status_code == 200
     assert b"<!DOCTYPE html>" in response.data or b"<html" in response.data.lower()
-    assert "Служба по контракту".encode() in response.data
+    assert "снят с публикации".encode() in response.data.lower()
 
 
 class TestApplicationValidation:
@@ -115,26 +115,15 @@ class TestApplicationValidation:
 class TestApplyEndpoint:
   """TC-011–TC-014: Application submission API."""
 
-  def test_successful_submission(self, client, valid_payload, tmp_path, monkeypatch):
-    test_file = tmp_path / "applications.jsonl"
-    monkeypatch.setattr("app.APPLICATIONS_FILE", test_file)
-    monkeypatch.setattr("app.DATA_DIR", tmp_path)
-    monkeypatch.setattr("app.deliver_application", lambda _record: "test")
+  def test_submission_disabled_when_unpublished(self, client, valid_payload):
     response = client.post(
       "/api/apply",
       data=json.dumps(valid_payload),
       content_type="application/json",
     )
-    assert response.status_code == 201
+    assert response.status_code == 410
     body = response.get_json()
-    assert body["success"] is True
-    assert "id" in body
-
-    assert test_file.exists()
-    lines = test_file.read_text(encoding="utf-8").strip().split("\n")
-    assert len(lines) == 1
-    saved = json.loads(lines[0])
-    assert saved["name"] == valid_payload["name"]
+    assert body["success"] is False
 
   def test_invalid_submission_returns_400(self, client, valid_payload):
     valid_payload["age"] = 10
