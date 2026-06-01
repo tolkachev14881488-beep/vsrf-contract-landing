@@ -236,11 +236,12 @@
     if (type) status.classList.add(`is-${type}`);
   }
 
-  function buildFormSubmitBody(payload) {
+  function buildFormSubmitBody(payload, form) {
     return {
       _subject: `Заявка: ${payload.name} — ${payload.phone}`,
       _template: "table",
       _captcha: "false",
+      _honey: form._honey?.value || "",
       "ФИО": payload.name,
       "Телефон": payload.phone,
       "Возраст": String(payload.age),
@@ -275,7 +276,7 @@
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify(buildFormSubmitBody(payload)),
+        body: JSON.stringify(buildFormSubmitBody(payload, form)),
       });
 
       const body = await res.json().catch(() => ({}));
