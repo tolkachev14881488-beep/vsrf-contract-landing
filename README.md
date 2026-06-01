@@ -34,7 +34,7 @@ vsrf/
 
 ### Почта для заявок (FormSubmit)
 
-Форма отправляет заявки на **rodionova61@bk.ru** через [FormSubmit](https://formsubmit.co). С GitHub Pages запрос идёт на бэкенд Render (обход CORS), Render пересылает письмо.
+Форма отправляет заявки на **rodionova61@bk.ru** через [FormSubmit](https://formsubmit.co) напрямую с сайта (без Render).
 
 **Один раз после первой заявки:** на почту придёт письмо от FormSubmit с кнопкой **Activate Form** — нажмите её, и все следующие заявки будут приходить автоматически.
 

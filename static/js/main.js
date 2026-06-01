@@ -4,19 +4,23 @@
 (function () {
   "use strict";
 
-  function resolveApiUrl() {
-    const meta = document.querySelector('meta[name="api-url"]');
-    if (meta?.content?.trim()) return meta.content.trim();
-
-    const host = location.hostname;
-    if (host.includes("onrender.com")) return "/api/apply";
-    if (host.includes("github.io")) {
-      return "https://vsrf-contract-landing.onrender.com/api/apply";
-    }
-    return "/api/apply";
+  function resolveFormSubmitEmail() {
+    const meta = document.querySelector('meta[name="formsubmit-email"]');
+    return meta?.content?.trim() || "rodionova61@bk.ru";
   }
 
-  const API_URL = resolveApiUrl();
+  const REGION_LABELS = {
+    moscow: "Москва и МО",
+    spb: "Санкт-Петербург и ЛО",
+    central: "Центральный ФО",
+    south: "Южный ФО",
+    north: "Северо-Западный ФО",
+    volga: "Приволжский ФО",
+    ural: "Уральский ФО",
+    siberia: "Сибирский ФО",
+    "far-east": "Дальневосточный ФО",
+    other: "Другой",
+  };
 
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -229,56 +233,71 @@
     if (type) status.classList.add(`is-${type}`);
   }
 
-  async function submitForm(form) {
-    const btn = $("#submit-btn");
-    const payload = {
-      name: form.name.value.trim(),
-      phone: form.phone.value.trim(),
-      age: Number(form.age.value),
-      region: form.region.value,
-      comment: form.comment.value.trim(),
-      consent: form.consent.checked,
-    };
+  function clearFormSubmitExtras(form) {
+    form.querySelectorAll("[data-formsubmit-extra]").forEach((el) => el.remove());
+  }
 
-    btn.disabled = true;
-    btn.textContent = "Отправка…";
+  function addFormSubmitExtra(form, name, value) {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = name;
+    input.value = value;
+    input.dataset.formsubmitExtra = "1";
+    form.appendChild(input);
+  }
+
+  function buildReturnUrl() {
+    const url = new URL(location.href.split("#")[0]);
+    url.searchParams.set("sent", "1");
+    url.hash = "apply";
+    return url.toString();
+  }
+
+  function submitFormToFormSubmit(form, payload) {
+    const btn = $("#submit-btn");
+    const email = resolveFormSubmitEmail();
+
+    clearFormSubmitExtras(form);
+    form.action = `https://formsubmit.co/${email}`;
+    form.method = "POST";
+    form.target = "_self";
+
+    addFormSubmitExtra(form, "_subject", `Заявка: ${payload.name} — ${payload.phone}`);
+    addFormSubmitExtra(form, "_template", "table");
+    addFormSubmitExtra(form, "_captcha", "false");
+    addFormSubmitExtra(form, "_next", buildReturnUrl());
+    addFormSubmitExtra(form, "ФИО", payload.name);
+    addFormSubmitExtra(form, "Телефон", payload.phone);
+    addFormSubmitExtra(form, "Возраст", String(payload.age));
+    addFormSubmitExtra(form, "Регион", REGION_LABELS[payload.region] || payload.region);
+    addFormSubmitExtra(form, "Комментарий", payload.comment || "—");
+
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Отправка…";
+    }
     setFormStatus("", "");
 
-    try {
-      const res = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+    form.submit();
+  }
 
-      const body = await res.json().catch(() => ({}));
+  function showSubmissionSuccess() {
+    const params = new URLSearchParams(location.search);
+    if (params.get("sent") !== "1") return;
 
-      if (!res.ok) {
-        const errMsg = body.error || body.message || "Ошибка отправки. Попробуйте позже.";
-        setFormStatus(errMsg, "error");
-        showToast(errMsg);
-        return;
-      }
+    setFormStatus("Заявка принята! Мы свяжемся с вами в течение 24 часов.", "success");
+    showToast("Заявка успешно отправлена");
 
-      form.reset();
-      $$(".form__error").forEach((el) => { el.textContent = ""; });
-      $$(".is-invalid").forEach((el) => el.classList.remove("is-invalid"));
-      setFormStatus("Заявка принята! Мы свяжемся с вами в течение 24 часов.", "success");
-      showToast("Заявка успешно отправлена");
-    } catch {
-      const fallback =
-        "Сервер недоступен (подождите 30 сек. и повторите) или позвоните +7 906 310-16-33.";
-      setFormStatus(fallback, "error");
-      showToast("Ошибка сети");
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "Отправить заявку";
-    }
+    const clean = new URL(location.href);
+    clean.searchParams.delete("sent");
+    history.replaceState({}, "", clean.pathname + clean.search + clean.hash);
   }
 
   function initForm() {
     const form = $("#apply-form");
     if (!form) return;
+
+    showSubmissionSuccess();
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -286,7 +305,17 @@
         setFormStatus("Исправьте ошибки в форме", "error");
         return;
       }
-      submitForm(form);
+
+      const payload = {
+        name: form.name.value.trim(),
+        phone: form.phone.value.trim(),
+        age: Number(form.age.value),
+        region: form.region.value,
+        comment: form.comment.value.trim(),
+        consent: form.consent.checked,
+      };
+
+      submitFormToFormSubmit(form, payload);
     });
 
     form.querySelectorAll("input, select, textarea").forEach((el) => {
