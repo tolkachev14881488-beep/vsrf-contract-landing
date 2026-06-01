@@ -171,7 +171,7 @@
     },
     age(value) {
       const n = Number(value);
-      if (!Number.isInteger(n) || n < 18 || n > 65) return "Возраст должен быть от 18 до 65 лет";
+      if (!Number.isInteger(n) || n < 18 || n > 63) return "Возраст должен быть от 18 до 63 лет";
       return "";
     },
     region(value) {

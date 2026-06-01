@@ -82,8 +82,8 @@ class TestApplicationValidation:
     _, error = validate_application(valid_payload)
     assert error is not None
 
-  def test_age_above_65_rejected(self, valid_payload):
-    valid_payload["age"] = 66
+  def test_age_above_63_rejected(self, valid_payload):
+    valid_payload["age"] = 64
     _, error = validate_application(valid_payload)
     assert error is not None
 
@@ -162,6 +162,20 @@ class TestApplyEndpoint:
     assert len(data["comment"]) == 2000
 
 
+class TestSeoMeta:
+  """TC-014: SEO tags and structured data on landing page."""
+
+  def test_seo_meta_and_json_ld(self, client):
+    response = client.get("/")
+    html = response.data.decode("utf-8")
+    assert response.status_code == 200
+    assert 'name="description"' in html
+    assert "canonical" in html
+    assert 'property="og:title"' in html
+    assert "application/ld+json" in html
+    assert "FAQPage" in html
+
+
 class TestStaticAssets:
   """TC-015–TC-016: Static resources availability."""
 
@@ -174,3 +188,13 @@ class TestStaticAssets:
     response = client.get("/static/js/main.js")
     assert response.status_code == 200
     assert b"validateForm" in response.data or b"/api/apply" in response.data
+
+  def test_robots_txt(self, client):
+    response = client.get("/robots.txt")
+    assert response.status_code == 200
+    assert b"Sitemap:" in response.data
+
+  def test_sitemap_xml(self, client):
+    response = client.get("/sitemap.xml")
+    assert response.status_code == 200
+    assert b"<urlset" in response.data

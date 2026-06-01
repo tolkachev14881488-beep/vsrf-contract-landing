@@ -73,8 +73,8 @@ def validate_application(payload: dict) -> tuple[dict | None, str | None]:
     except (TypeError, ValueError):
         return None, "Укажите корректный возраст"
 
-    if age_int < 18 or age_int > 65:
-        return None, "Возраст должен быть от 18 до 65 лет"
+    if age_int < 18 or age_int > 63:
+        return None, "Возраст должен быть от 18 до 63 лет"
 
     if region not in VALID_REGIONS:
         return None, "Выберите регион из списка"
@@ -102,6 +102,16 @@ def save_application(record: dict) -> None:
 @app.route("/")
 def index():
     return send_from_directory(BASE_DIR, "index.html")
+
+
+@app.route("/robots.txt")
+def robots_txt():
+    return send_from_directory(BASE_DIR, "robots.txt")
+
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    return send_from_directory(BASE_DIR, "sitemap.xml")
 
 
 @app.route("/api/apply", methods=["POST"])
