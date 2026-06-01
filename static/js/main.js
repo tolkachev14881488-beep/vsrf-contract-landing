@@ -4,7 +4,19 @@
 (function () {
   "use strict";
 
-  const API_URL = "/api/apply";
+  function resolveApiUrl() {
+    const meta = document.querySelector('meta[name="api-url"]');
+    if (meta?.content?.trim()) return meta.content.trim();
+
+    const host = location.hostname;
+    if (host.includes("onrender.com")) return "/api/apply";
+    if (host.includes("github.io")) {
+      return "https://vsrf-contract-landing.onrender.com/api/apply";
+    }
+    return "/api/apply";
+  }
+
+  const API_URL = resolveApiUrl();
 
   const $ = (sel, root = document) => root.querySelector(sel);
   const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -239,7 +251,9 @@
       setFormStatus("Заявка принята! Мы свяжемся с вами в течение 24 часов.", "success");
       showToast("Заявка успешно отправлена");
     } catch {
-      setFormStatus("Нет связи с сервером. Проверьте подключение.", "error");
+      const fallback =
+        "Сервер временно недоступен. Позвоните по телефону 8 800 100-00-00 или повторите позже.";
+      setFormStatus(fallback, "error");
       showToast("Ошибка сети");
     } finally {
       btn.disabled = false;

@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from flask import Flask, jsonify, request, send_from_directory
+from flask_cors import CORS
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
@@ -33,6 +34,12 @@ VALID_REGIONS = {
 }
 
 app = Flask(__name__, static_folder="static", static_url_path="/static")
+
+CORS(
+    app,
+    resources={r"/api/*": {"origins": "*"}},
+    supports_credentials=False,
+)
 
 
 def ensure_data_dir() -> None:
